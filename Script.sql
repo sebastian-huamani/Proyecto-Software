@@ -1,0 +1,335 @@
+-- CREACION DE BASE DE DATOS
+CREATE DATABASE VENTA_SOFTWARE -- USAR
+USE VENTA_SOFTWARE -- CREACION DE TABLAS 
+CREATE TABLE CLIENTE (
+    Id_Cliente INT AUTO_INCREMENT PRIMARY KEY,
+    Nombres VARCHAR (50),
+    Apellidos VARCHAR (50),
+    DNI CHAR(8),
+    Telefono INT(9),
+    Empresa VARCHAR(50)
+);
+
+CREATE TABLE PRODUCTO (
+    Id_Producto INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre VARCHAR(50),
+    Version_P VARCHAR(50),
+    Precio DOUBLE(10, 2)
+);
+
+CREATE TABLE VENTAS (
+    Id_Ventas INT AUTO_INCREMENT PRIMARY KEY,
+    Fecha_Compra DATE,
+    Detalle VARCHAR (20),
+    Garantia INT,
+    Precio_Total DOUBLE (10, 2),
+    Id_Producto INT,
+    Id_Trabajador INT,
+    Id_Cliente INT
+);
+
+CREATE TABLE SOPORTE (
+    Id_Soporte INT AUTO_INCREMENT PRIMARY KEY,
+    Detalle VARCHAR(20),
+    Fecha DATE,
+    Id_Ventas INT,
+    Id_Trabajador INT
+);
+
+CREATE TABLE LOGIN (
+    Id_Login INT AUTO_INCREMENT PRIMARY KEY,
+    Correo VARCHAR (50),
+    Contraseña VARCHAR (20)
+);
+
+CREATE TABLE TRABAJADOR (
+    Id_Trabajador INT AUTO_INCREMENT PRIMARY KEY,
+    Nombres VARCHAR(50),
+    Apellidos VARCHAR (50),
+    DNI CHAR(8),
+    Fecha_Contrato DATE,
+    Id_Tipo_Trabajador INT,
+    Id_Login INT
+);
+
+CREATE TABLE TIPO_TRABAJADOR (
+    Id_Tipo_Trabajador INT AUTO_INCREMENT PRIMARY KEY,
+    Trabajador VARCHAR(20)
+);
+
+SELECT
+    *
+FROM
+    TIPO_TRABAJADOR -- LLAVES FK
+ALTER TABLE
+    VENTAS
+ADD
+    CONSTRAINT FK_VENTAS_CLIENTE FOREIGN KEY (Id_Cliente) REFERENCES cliente (Id_Cliente);
+
+ALTER TABLE
+    VENTAS
+ADD
+    CONSTRAINT FK_VENTAS_PRODUCTO FOREIGN KEY (Id_Producto) REFERENCES producto (Id_Producto);
+
+ALTER TABLE
+    VENTAS
+ADD
+    CONSTRAINT FK_VENTAS_TRABAJADOR FOREIGN KEY (Id_Trabajador) REFERENCES trabajador (Id_Trabajador);
+
+ALTER TABLE
+    SOPORTE
+ADD
+    CONSTRAINT FK_SOPORTE_Trabajador FOREIGN KEY (Id_Trabajador) REFERENCES trabajador (Id_Trabajador);
+
+ALTER TABLE
+    SOPORTE
+ADD
+    CONSTRAINT FK_SOPORTE_VENTAS FOREIGN KEY (Id_Ventas) REFERENCES ventas (Id_Ventas);
+
+ALTER TABLE
+    TRABAJADOR
+ADD
+    CONSTRAINT FK_TRABAJADOR_TIPO_TRABAJADOR FOREIGN KEY (Id_Tipo_Trabajador) REFERENCES tipo_trabajador (Id_Tipo_Trabajador);
+
+ALTER TABLE
+    TRABAJADOR
+ADD
+    CONSTRAINT FK_TRABAJADOR_LOGIN FOREIGN KEY (Id_Login) REFERENCES login (Id_Login);
+
+-- CLIENTES
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- BUSCAR
+CREATE PROCEDURE SP_BUSCAR_X_NOMBRES_CLIENTE(NOMBRES INT)
+SELECT
+    *
+FROM
+    CLIENTE
+WHERE
+    Nombres LIKE NOMBRES;
+
+CALL SP_BUSCAR_X_NOMBRES_CLIENTE(1);
+
+-- INSERTAR 
+CREATE PROCEDURE SP_INSERTAR_CLIENTE (
+    Id_Cliente INT,
+    Nombres VARCHAR (50),
+    Apellidos VARCHAR (50),
+    DNI CHAR(8),
+    Telefono INT(9),
+    Empresa VARCHAR(50)
+)
+INSERT INTO
+    CLIENTE(
+        Id_Cliente,
+        Nombres,
+        Apellidos,
+        DNI,
+        Telefono,
+        Empresa
+    )
+VALUES
+    (DEFAULT, Nombres, Apellidos, DNI, Telefono, Empresa);
+
+-- ACTUALIZAR
+CREATE PROCEDURE SP_ACTUALIZAR_CLIENTE (
+    id INT,
+    Nombres VARCHAR (50),
+    Apellidos VARCHAR (50),
+    DNI CHAR(8),
+    Telefono INT(9),
+    Empresa VARCHAR(50)
+)
+UPDATE
+    CLIENTE
+SET
+    NOMBRES = Nombres,
+    APELLIDOS = Apellidos,
+    DNI = DNI,
+    TELEFONO = Telefono,
+    EMPRESA = Empresa
+WHERE
+    ID_CLIENTE = id;
+
+-- ELIMINAR
+CREATE PROCEDURE SP_ELIMINAR_CLIENTE(C_ID_CLIENTE INT)
+DELETE FROM
+    CLIENTE
+WHERE
+    ID_CLIENTE = C_ID_CLIENTE;
+
+-- LOGIN
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- BUSCAR
+CREATE PROCEDURE SP_BUSCAR_X_CORREO_LOGIN(CORREO VARCHAR(50))
+SELECT
+    *
+FROM
+    LOGIN
+WHERE
+    Correo LIKE CORREO;
+
+-- INSERTAR 
+CREATE PROCEDURE SP_INSERTAR_LOGIN (
+    Id_Login INT,
+    Correo VARCHAR (50),
+    Contraseña VARCHAR (20)
+)
+INSERT INTO
+    LOGIN(Id_Login, Correo, Contraseña)
+VALUES
+    (DEFAULT, Correo, Contraseña);
+
+-- ACTUALIZAR
+CREATE PROCEDURE SP_ACTUALIZAR_LOGIN (
+    Id_Login INT,
+    Correo VARCHAR (50),
+    Contraseña VARCHAR (20)
+)
+UPDATE
+    LOGIN
+SET
+    CORREO = L_CORREO,
+    CONTRASEÑA = L_CONTRASEÑA
+WHERE
+    ID_LOGIN = L_ID_LOGIN;
+
+-- ELIMINAR
+CREATE PROCEDURE SP_ELIMINAR_LOGIN(L_ID_LOGIN INT)
+DELETE FROM
+    LOGIN
+WHERE
+    ID_LOGIN = L_ID_LOGIN;
+
+SELECT
+    *
+FROM
+    CLIENTE
+
+-- Productos
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- BUSCAR
+CREATE PROCEDURE SP_BUSCAR_X_NOMBRE_PRODUCTO(N VARCHAR(50))
+SELECT * FROM PRODUCTO WHERE Nombre LIKE N ;
+
+--INSERTAR
+CREATE PROCEDURE SP_INSERTAR_PRODUCTO(N VARCHAR(50), V VARCHAR(50), P DOUBLE(10,2))
+INSERT INTO PRODUCTO(Nombre,Version_P,Precio) VALUES(N,V,P);
+
+
+CREATE PROCEDURE SP_ACTUALIZAR_PRODUCTO(C INT,  N VARCHAR(50), V VARCHAR(50), P DOUBLE(10,2))
+UPDATE PRODUCTO SET Nombre = N ,Version_P = V ,Precio = P  WHERE Id_Producto = C;
+
+
+CREATE PROCEDURE SP_ELIMINAR_PRODUCTO(C INT)
+DELETE FROM PRODUCTO WHERE Id_Producto = C;
+
+CREATE PROCEDURE SP_LISTARPRODUCTOS()
+SELECT * FROM PRODUCTO;
+
+-- Ingresar cuenta
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+CREATE PROCEDURE SP_BUSCAR_CUENTA(C VARCHAR(50),P VARCHAR(50))
+SELECT count(*) FROM LOGIN WHERE CORREO = C AND CONTRASEÑA  = P;
+
+INSERT INTO LOGIN(CORREO, CONTRASEÑA) VALUES('ALUMNO','IDAT');
+
+call SP_BUSCAR_CUENTA('ALUMNO','IDAT');
+
+
+
+-- Listar cuenta
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+CREATE PROCEDURE SP_LISTAR_CUENTAS()
+SELECT  L.Id_Login,L.CORREO,L.Contraseña, T.Nombres, T.Apellidos, T.DNI, TT.TRABAJADOR
+FROM TRABAJADOR T
+INNER JOIN LOGIN L
+ON T.Id_Login = L.Id_Login 
+INNER JOIN TIPO_TRABAJADOR TT
+ON T.Id_Tipo_Trabajador = TT.Id_Tipo_Trabajador;
+
+CREATE PROCEDURE SP_LISTAR_CUENTAS_VENDEDOR()
+SELECT L.Id_Login, L.CORREO, L.Contraseña,T.Nombres, T.Apellidos, T.DNI, TT.TRABAJADOR
+FROM TRABAJADOR T
+INNER JOIN LOGIN L
+ON T.Id_Login = L.Id_Login 
+INNER JOIN TIPO_TRABAJADOR TT
+ON T.Id_Tipo_Trabajador = TT.Id_Tipo_Trabajador 
+Where TT.Id_Tipo_Trabajador = 1;
+
+
+CREATE PROCEDURE SP_LISTAR_CUENTAS_SOPORTE()
+SELECT  L.Id_Login, L.CORREO, L.Contraseña, T.Nombres, T.Apellidos, T.DNI, TT.TRABAJADOR
+FROM TRABAJADOR T
+INNER JOIN LOGIN L
+ON T.Id_Login = L.Id_Login 
+INNER JOIN TIPO_TRABAJADOR TT
+ON T.Id_Tipo_Trabajador = TT.Id_Tipo_Trabajador 
+Where TT.Id_Tipo_Trabajador = 2;
+
+CREATE PROCEDURE SP_ELIMINAR_CUENTA(ID INT)
+DELETE FROM LOGIN WHERE ID_LOGIN = ID;
+
+CREATE PROCEDURE SP_ACTUALIZAR_CUENTA(ID INT, C VARCHAR(50),  P VARCHAR(50))
+UPDATE LOGIN SET CORREO = C , CONTRASEÑA = P ,WHERE ID_LOGIN = ID;
+
+
+-- Listar trabajadores
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+CREATE PROCEDURE SP_LISTAR_TRABAJADORES()
+SELECT T.Id_Trabajador, T.NOMBRES, T.APELLIDOS, T.DNI, T.Fecha_Contrato,  TT.TRABAJADOR
+FROM TRABAJADOR T
+INNER JOIN TIPO_TRABAJADOR TT
+ON T.Id_Tipo_Trabajador = TT.Id_Tipo_Trabajador;
+
+CREATE PROCEDURE SP_LISTAR_TRABAJADOR_VENTAS()
+SELECT T.Id_Trabajador, T.NOMBRES, T.APELLIDOS, T.DNI, T.Fecha_Contrato,  TT.TRABAJADOR
+FROM TRABAJADOR T
+INNER JOIN TIPO_TRABAJADOR TT
+ON T.Id_Tipo_Trabajador = TT.Id_Tipo_Trabajador
+WHERE TT.Id_Tipo_Trabajador = 1;
+
+CREATE PROCEDURE SP_LISTAR_TRABAJADOR_SOPORTE()
+SELECT T.Id_Trabajador, T.NOMBRES, T.APELLIDOS, T.DNI, T.Fecha_Contrato,  TT.TRABAJADOR
+FROM TRABAJADOR T
+INNER JOIN TIPO_TRABAJADOR TT
+ON T.Id_Tipo_Trabajador = TT.Id_Tipo_Trabajador
+WHERE TT.Id_Tipo_Trabajador = 2;
+
+CREATE PROCEDURE SP_ACTUALIZAR_TRABAJADOR(ID INT, N VARCHAR(50),  P VARCHAR(50), D CHAR(8), FC VARCHAR(50))
+UPDATE TRABAJADOR SET NOMBRES = N , APELLIDOS = P , DNI = D , Fecha_Contrato = FC WHERE Id_Trabajador = ID;
+
+CREATE PROCEDURE SP_INSERTAR_TRABAJADOR(N VARCHAR(50),  P VARCHAR(50), D CHAR(8), FC VARCHAR(50) ,TT INT, L INT)
+INSERT INTO TRABAJADOR(NOMBRES,APELLIDOS,DNI,Fecha_Contrato, Id_Tipo_Trabajador, ID_LOGIN) VALUES(N,P,D,FC,TT,L);
+
+CREATE PROCEDURE SP_ELIMINAR_TRABAJADOR(ID INT)
+DELETE FROM TRABAJADOR WHERE Id_Trabajador = ID;
+
+CREATE PROCEDURE SP_INSERTA_CUENTA(C VARCHAR(50))
+INSERT INTO LOGIN(CORREO, Contraseña) VALUES(C, "Canela");
+
+CREATE PROCEDURE SP_CANTIDAD_CUENTAS()
+select Id_Login as CANTIDAD from LOGIN  order by Id_Login desc limit 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+CALL SP_INSERTAR_TRABAJADOR(8, 'ADMIN','admin','74111343','2022-02-02')
+
+INSERT INTO login(Correo, Contraseña) VALUES ('ADMIN','ADMIN');
+
+INSERT INTO tipo_trabajador(Trabajador) VALUES ('Vendedor'),('Soporte');
+insert into trabajador(Nombres,Apellidos,DNI, Fecha_Contrato,Id_Tipo_Trabajador,Id_Login)
+values ('Sebastian','Huamani Tassara',74118343,'2022-04-22',2,1);
+insert into trabajador(Nombres,Apellidos,DNI, Fecha_Contrato,Id_Tipo_Trabajador,Id_Login)
+values ('Vidal','Jonson Json',96445623,'2022-04-23',1,1);
